@@ -1,0 +1,40 @@
+name: Create Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release tag'
+        required: true
+
+jobs:
+  tag:
+    name: Create tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+        with:
+          token: ${{ secrets.TAG_PSAT }}
+          fetch-depth: 0
+      - name: 'Get previous tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1.1"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: 'Get possible next tags'
+        id: semvers
+        uses: "WyriHaximus/github-action-next-semvers@v1.1"
+        with:
+          version: ${{ steps.previoustag.outputs.tag }}
+      - name: 'Verify input version'
+        if: github.event.inputs.version != steps.semvers.outputs.v_major && github.event.inputs.version != steps.semvers.outputs.v_minor && github.event.inputs.version != steps.semvers.outputs.v_patch
+        run: exit 1
+      - name: 'Update version file'
+        run: echo ${{ github.event.inputs.version }} >VERSION
+      - name: 'Commit and tag'
+        uses: EndBug/add-and-commit@v7
+        with:
+          default_author: github_actions
+          message: Update version number
+          add: 'VERSION'
+          tag: ${{ github.event.inputs.version }}
