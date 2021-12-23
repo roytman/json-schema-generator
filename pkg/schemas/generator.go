@@ -56,7 +56,11 @@ func (Generator) CheckFilter() loader.NodeFilter {
 }
 
 func (Generator) RegisterMarkers(into *markers.Registry) error {
-	crdmarkers.Register(into) // TODO: only validation markers
+	// TODO: only register validation markers
+	if err := crdmarkers.Register(into); err != nil {
+		return err
+	}
+
 	if err := markers.RegisterAll(into, schemaMarker, objectMarker); err != nil {
 		return err
 	}
@@ -132,7 +136,8 @@ func (g Generator) output(documents map[string]*apiext.JSONSchemaProps) error {
 		if err != nil {
 			return err
 		}
-		f.Write(bytes)
+		_, err = f.Write(bytes)
+		return err
 	}
 
 	return nil
