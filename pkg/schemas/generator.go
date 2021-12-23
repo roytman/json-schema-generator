@@ -137,7 +137,9 @@ func (g Generator) output(documents map[string]*apiext.JSONSchemaProps) error {
 			return err
 		}
 		_, err = f.Write(bytes)
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
