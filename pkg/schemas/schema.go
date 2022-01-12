@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// This file is modified from https://github.com/kubernetes-sigs/controller-tools/blob/v0.7.0/pkg/crd/schema.go
+// Modifications are listed in // Note comments
+
 package schemas
 
 import (
