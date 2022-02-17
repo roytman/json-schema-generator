@@ -94,6 +94,7 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 	}
 
 	documents := make(map[string]*apiext.JSONSchemaProps)
+	//nolint:gocritic
 	for typeIdent, typeSchema := range parser.Schemata {
 		documentName := context.documentNameFor(typeIdent.Package)
 		document, exists := documents[documentName]
@@ -125,9 +126,9 @@ func (g Generator) output(documents map[string]*apiext.JSONSchemaProps) error {
 		if err != nil {
 			return err
 		}
-
+		//nolint:gocritic
 		defer func() {
-			if err := f.Close(); err != nil {
+			if err = f.Close(); err != nil {
 				log.Printf("Error closing file: %s\n", err)
 			}
 		}()
