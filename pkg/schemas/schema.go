@@ -214,13 +214,13 @@ func localNamedToSchema(ctx *schemaContext, ident *ast.Ident) *apiext.JSONSchema
 		return &apiext.JSONSchemaProps{}
 	}
 	if basicInfo, isBasic := typeInfo.(*types.Basic); isBasic {
-		typ, fmt, err := builtinToType(basicInfo, ctx.allowDangerousTypes)
+		typ, format, err := builtinToType(basicInfo, ctx.allowDangerousTypes)
 		if err != nil {
 			ctx.pkg.AddError(loader.ErrFromNode(err, ident))
 		}
 		return &apiext.JSONSchemaProps{
 			Type:   typ,
-			Format: fmt,
+			Format: format,
 		}
 	}
 	// NB(directxman12): if there are dot imports, this might be an external reference,
@@ -330,6 +330,7 @@ func mapToSchema(ctx *schemaContext, mapType *ast.MapType) *apiext.JSONSchemaPro
 
 // structToSchema creates a schema for the given struct.  Embedded fields are placed in AllOf,
 // and can be flattened later with a Flattener.
+// nolint:gocyclo
 func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSONSchemaProps {
 	props := &apiext.JSONSchemaProps{
 		Type:       "object",
@@ -345,7 +346,8 @@ func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSON
 		jsonTag, hasTag := field.Tag.Lookup("json")
 		if !hasTag {
 			// if the field doesn't have a JSON tag, it doesn't belong in output (and shouldn't exist in a serialized type)
-			ctx.pkg.AddError(loader.ErrFromNode(fmt.Errorf("encountered struct field %q without JSON tag in type %q", field.Name, ctx.info.Name), field.RawField))
+			ctx.pkg.AddError(loader.ErrFromNode(
+				fmt.Errorf("encountered struct field %q without JSON tag in type %q", field.Name, ctx.info.Name), field.RawField))
 			continue
 		}
 		jsonOpts := strings.Split(jsonTag, ",")
@@ -413,7 +415,7 @@ func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSON
 // builtinToType converts builtin basic types to their equivalent JSON schema form.
 // It *only* handles types allowed by the kubernetes API standards. Floats are not
 // allowed unless allowDangerousTypes is true
-func builtinToType(basic *types.Basic, allowDangerousTypes bool) (typ string, format string, err error) {
+func builtinToType(basic *types.Basic, allowDangerousTypes bool) (typ, format string, err error) {
 	// NB(directxman12): formats from OpenAPI v3 are slightly different than those defined
 	// in JSONSchema.  This'll use the OpenAPI v3 ones, since they're useful for bounding our
 	// non-string types.
@@ -429,7 +431,9 @@ func builtinToType(basic *types.Basic, allowDangerousTypes bool) (typ string, fo
 		if allowDangerousTypes {
 			typ = "number"
 		} else {
-			return "", "", errors.New("found float, the usage of which is highly discouraged, as support for them varies across languages. Please consider serializing your float as string instead. If you are really sure you want to use them, re-run with crd:allowDangerousTypes=true")
+			return "", "", errors.New("found float, the usage of which is highly discouraged, as support for them varies across languages. " +
+				"Please consider serializing your float as string instead. " +
+				"If you are really sure you want to use them, re-run with crd:allowDangerousTypes=true")
 		}
 	default:
 		return "", "", fmt.Errorf("unsupported type %q", basic.String())

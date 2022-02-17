@@ -8,7 +8,7 @@ linters-settings:
     local-prefixes: fybrik.io/json-schema-generator
   goconst:
     min-len: 2
-    min-occurrences: 2
+    min-occurrences: 3
   gocritic:
     enabled-tags:
       - diagnostic
