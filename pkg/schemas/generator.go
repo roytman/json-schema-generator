@@ -309,7 +309,6 @@ func (g Generator) output(documents map[string]*apiext.JSONSchemaProps) error {
 		if err != nil {
 			return err
 		}
-		//nolint:gocritic
 		defer func() {
 			if err = f.Close(); err != nil {
 				log.Printf("Error closing file: %s\n", err)
