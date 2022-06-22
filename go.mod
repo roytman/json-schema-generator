@@ -3,7 +3,7 @@ module fybrik.io/json-schema-generator
 go 1.17
 
 require (
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	k8s.io/apiextensions-apiserver v0.24.0
 	sigs.k8s.io/controller-tools v0.9.0
 )
