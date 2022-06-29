@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/spf13/cobra v1.5.0
 	k8s.io/apiextensions-apiserver v0.24.2
-	sigs.k8s.io/controller-tools v0.9.0
+	sigs.k8s.io/controller-tools v0.9.1
 )
 
 require github.com/xeipuuv/gojsonschema v1.2.0
