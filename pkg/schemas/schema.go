@@ -330,7 +330,8 @@ func mapToSchema(ctx *schemaContext, mapType *ast.MapType) *apiext.JSONSchemaPro
 
 // structToSchema creates a schema for the given struct.  Embedded fields are placed in AllOf,
 // and can be flattened later with a Flattener.
-// nolint:gocyclo
+//
+//nolint:gocyclo
 func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSONSchemaProps {
 	props := &apiext.JSONSchemaProps{
 		Type:       "object",
