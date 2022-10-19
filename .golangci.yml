@@ -98,6 +98,7 @@ linters:
     - unused
   #  - varcheck
     - whitespace
+  # temporary disable due to the bug to
     - revive
 
   # don't enable:
