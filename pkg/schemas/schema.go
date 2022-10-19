@@ -35,6 +35,12 @@ import (
 	"sigs.k8s.io/controller-tools/pkg/markers"
 )
 
+const (
+	Optional = "optional"
+	Required = "required"
+	Empty    = ""
+)
+
 // Schema flattening is done in a recursive mapping method.
 // Start reading at infoToSchema.
 
@@ -229,7 +235,7 @@ func localNamedToSchema(ctx *schemaContext, ident *ast.Ident) *apiext.JSONSchema
 	pkg := typeNameInfo.Pkg()
 	pkgPath := loader.NonVendorPath(pkg.Path())
 	if pkg == ctx.pkg.Types {
-		pkgPath = ""
+		pkgPath = Empty
 	}
 
 	typeIdent := ctx.typeIdentFor(pkgPath, typeNameInfo.Name())
@@ -288,7 +294,7 @@ func mapToSchema(ctx *schemaContext, mapType *ast.MapType) *apiext.JSONSchemaPro
 	for keyInfo != nil {
 		switch typedKey := keyInfo.(type) {
 		case *types.Basic:
-			if typedKey.Info()&types.IsString == 0 {
+			if typedKey.Info()&types.IsString == 0 { //nolint:revive
 				ctx.pkg.AddError(loader.ErrFromNode(fmt.Errorf("map keys must be strings, not %s", keyInfo.String()), mapType.Key))
 				return &apiext.JSONSchemaProps{}
 			}
@@ -352,14 +358,14 @@ func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSON
 			continue
 		}
 		jsonOpts := strings.Split(jsonTag, ",")
-		if len(jsonOpts) == 1 && jsonOpts[0] == "-" {
+		if len(jsonOpts) == 1 && jsonOpts[0] == "-" { //nolint:revive
 			// skipped fields have the tag "-" (note that "-," means the field is named "-")
 			continue
 		}
 
 		inline := false
 		omitEmpty := false
-		for _, opt := range jsonOpts[1:] {
+		for _, opt := range jsonOpts[1:] { //nolint:revive
 			switch opt {
 			case "inline":
 				inline = true
@@ -367,25 +373,25 @@ func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSON
 				omitEmpty = true
 			}
 		}
-		fieldName := jsonOpts[0]
-		inline = inline || fieldName == "" // anonymous fields are inline fields in YAML/JSON
+		fieldName := jsonOpts[0]              //nolint:revive
+		inline = inline || fieldName == Empty // anonymous fields are inline fields in YAML/JSON
 
 		// if no default required mode is set, default to required
-		defaultMode := "required"
+		defaultMode := Required
 		if ctx.PackageMarkers.Get("kubebuilder:validation:Optional") != nil {
-			defaultMode = "optional"
+			defaultMode = Optional
 		}
 
 		switch defaultMode {
 		// if this package isn't set to optional default...
-		case "required":
+		case Required:
 			// ...everything that's not inline, omitempty, or explicitly optional is required
 			if !inline && !omitEmpty && field.Markers.Get("kubebuilder:validation:Optional") == nil && field.Markers.Get("optional") == nil {
 				props.Required = append(props.Required, fieldName)
 			}
 
 		// if this package isn't set to required default...
-		case "optional":
+		case Optional:
 			// ...everything that isn't explicitly required is optional
 			if field.Markers.Get("kubebuilder:validation:Required") != nil {
 				props.Required = append(props.Required, fieldName)
@@ -417,27 +423,27 @@ func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSON
 // It *only* handles types allowed by the kubernetes API standards. Floats are not
 // allowed unless allowDangerousTypes is true
 func builtinToType(basic *types.Basic, allowDangerousTypes bool) (typ, format string, err error) {
-	// NB(directxman12): formats from OpenAPI v3 are slightly different than those defined
-	// in JSONSchema.  This'll use the OpenAPI v3 ones, since they're useful for bounding our
+	// NB(directxman12): formats from OpenAPI v3 are slightly different from those defined
+	// in JSONSchema.  This uses the OpenAPI v3 ones, since they're useful for bounding our
 	// non-string types.
 	basicInfo := basic.Info()
 	switch {
-	case basicInfo&types.IsBoolean != 0:
+	case basicInfo&types.IsBoolean != 0: //nolint:revive
 		typ = "boolean"
-	case basicInfo&types.IsString != 0:
+	case basicInfo&types.IsString != 0: //nolint:revive
 		typ = "string"
-	case basicInfo&types.IsInteger != 0:
+	case basicInfo&types.IsInteger != 0: //nolint:revive
 		typ = "integer"
-	case basicInfo&types.IsFloat != 0:
+	case basicInfo&types.IsFloat != 0: //nolint:revive
 		if allowDangerousTypes {
 			typ = "number"
 		} else {
-			return "", "", errors.New("found float, the usage of which is highly discouraged, as support for them varies across languages. " +
+			return Empty, Empty, errors.New("found float, the usage of which is highly discouraged, as support for them varies across languages. " +
 				"Please consider serializing your float as string instead. " +
 				"If you are really sure you want to use them, re-run with crd:allowDangerousTypes=true")
 		}
 	default:
-		return "", "", fmt.Errorf("unsupported type %q", basic.String())
+		return Empty, Empty, fmt.Errorf("unsupported type %q", basic.String())
 	}
 
 	switch basic.Kind() {

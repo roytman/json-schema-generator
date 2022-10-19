@@ -15,3 +15,15 @@
 # vendor/
 
 dist/
+
+# editor and IDE paraphernalia
+.idea
+*.swp
+*.swo
+*~
+.vscode
+.history
+.netrc
+
+.log
+.crt

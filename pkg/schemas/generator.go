@@ -24,7 +24,7 @@ import (
 var (
 	externalDocumentName = "external.json"
 	schemaMarker         = markers.Must(markers.MakeDefinition("fybrik:validation:schema", markers.DescribesPackage, struct{}{}))
-	objectMarker         = markers.Must(markers.MakeDefinition("fybrik:validation:object", markers.DescribesType, ObjName("")))
+	objectMarker         = markers.Must(markers.MakeDefinition("fybrik:validation:object", markers.DescribesType, ObjName(Empty)))
 )
 
 type ObjName string
@@ -213,7 +213,7 @@ func (context *GeneratorContext) getFields(typ crd.TypeIdent) ([]crd.TypeIdent, 
 
 // Create a crd.TypeIdent for a given AST type
 func typeToTypeIdent(fieldTypeName ast.Expr, pkg *loader.Package) crd.TypeIdent {
-	typeIdentField := crd.TypeIdent{Package: nil, Name: ""}
+	typeIdentField := crd.TypeIdent{Package: nil, Name: Empty}
 	switch expr := fieldTypeName.(type) {
 	case *ast.Ident, *ast.SelectorExpr, *ast.StructType:
 		typeInfo := pkg.TypesInfo.TypeOf(expr)
@@ -254,7 +254,7 @@ func indexOf(a string, list []string) int {
 			return i
 		}
 	}
-	return -1
+	return -1 //nolint:revive
 }
 
 // Remove fields that is not related to taxonomy
@@ -276,18 +276,18 @@ func (context *GeneratorContext) removeExtraProps(typeIdent crd.TypeIdent, v *ap
 			}
 			// If the field is not in the list of the needed fields then remove it from the schema
 			_, fieldKnownInfo := context.parser.Types[typeIdentField]
-			if indexOf(typeIdentField.Name, fieldTypes) == -1 || !fieldKnownInfo {
+			if indexOf(typeIdentField.Name, fieldTypes) == -1 || !fieldKnownInfo { //nolint:revive
 				jsonTag, hasTag := field.Tag.Lookup("json")
 				if !hasTag {
 					continue
 				}
 				jsonOpts := strings.Split(jsonTag, ",")
-				delete(v.Properties, jsonOpts[0])
-				index := indexOf(jsonOpts[0], v.Required)
-				if index != -1 {
+				delete(v.Properties, jsonOpts[0])         //nolint:revive
+				index := indexOf(jsonOpts[0], v.Required) //nolint:revive
+				if index != -1 {                          //nolint:revive
 					length := len(v.Required)
-					v.Required[index] = v.Required[length-1]
-					v.Required = v.Required[:length-1]
+					v.Required[index] = v.Required[length-1] //nolint:revive
+					v.Required = v.Required[:length-1]       //nolint:revive
 				}
 			}
 		}
@@ -316,7 +316,7 @@ func (g Generator) output(documents map[string]*apiext.JSONSchemaProps) error {
 			}
 		}()
 
-		bytes, err := json.MarshalIndent(doc, "", "  ")
+		bytes, err := json.MarshalIndent(doc, Empty, "  ")
 		if err != nil {
 			return err
 		}
@@ -349,8 +349,8 @@ func (context *GeneratorContext) definitionNameFor(documentName string, typeIden
 // is the package path with `/` replaced by `~1`, according to JSONPointer
 // escapes).
 func qualifiedName(pkgName, typeName string) string {
-	if pkgName != "" {
-		return strings.Replace(pkgName, "/", "~1", -1) + "~0" + typeName
+	if pkgName != Empty {
+		return strings.Replace(pkgName, "/", "~1", -1) + "~0" + typeName //nolint:revive
 	}
 	return typeName
 }
@@ -367,7 +367,7 @@ func (context *GeneratorContext) TypeRefLink(from *loader.Package, to crd.TypeId
 	// the `schema` marker or in a package with a type that has the `object` marker
 	// Otherwise, the suffix will be build using qualifiedName function
 	suffix := to.Name
-	if indexOf(to.Package.PkgPath, context.objectPkgs) == -1 {
+	if indexOf(to.Package.PkgPath, context.objectPkgs) == -1 { //nolint:revive
 		suffix = context.definitionNameFor(toDocument, to)
 	}
 	return prefix + suffix
