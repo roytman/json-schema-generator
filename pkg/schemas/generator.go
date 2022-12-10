@@ -254,7 +254,7 @@ func indexOf(a string, list []string) int {
 			return i
 		}
 	}
-	return -1 //nolint:revive
+	return -1
 }
 
 // Remove fields that is not related to taxonomy
@@ -276,18 +276,18 @@ func (context *GeneratorContext) removeExtraProps(typeIdent crd.TypeIdent, v *ap
 			}
 			// If the field is not in the list of the needed fields then remove it from the schema
 			_, fieldKnownInfo := context.parser.Types[typeIdentField]
-			if indexOf(typeIdentField.Name, fieldTypes) == -1 || !fieldKnownInfo { //nolint:revive
+			if indexOf(typeIdentField.Name, fieldTypes) == -1 || !fieldKnownInfo {
 				jsonTag, hasTag := field.Tag.Lookup("json")
 				if !hasTag {
 					continue
 				}
 				jsonOpts := strings.Split(jsonTag, ",")
-				delete(v.Properties, jsonOpts[0])         //nolint:revive
-				index := indexOf(jsonOpts[0], v.Required) //nolint:revive
-				if index != -1 {                          //nolint:revive
+				delete(v.Properties, jsonOpts[0])
+				index := indexOf(jsonOpts[0], v.Required)
+				if index != -1 {
 					length := len(v.Required)
-					v.Required[index] = v.Required[length-1] //nolint:revive
-					v.Required = v.Required[:length-1]       //nolint:revive
+					v.Required[index] = v.Required[length-1]
+					v.Required = v.Required[:length-1]
 				}
 			}
 		}
@@ -350,7 +350,7 @@ func (context *GeneratorContext) definitionNameFor(documentName string, typeIden
 // escapes).
 func qualifiedName(pkgName, typeName string) string {
 	if pkgName != Empty {
-		return strings.Replace(pkgName, "/", "~1", -1) + "~0" + typeName //nolint:revive
+		return strings.Replace(pkgName, "/", "~1", -1) + "~0" + typeName
 	}
 	return typeName
 }
@@ -367,7 +367,7 @@ func (context *GeneratorContext) TypeRefLink(from *loader.Package, to crd.TypeId
 	// the `schema` marker or in a package with a type that has the `object` marker
 	// Otherwise, the suffix will be build using qualifiedName function
 	suffix := to.Name
-	if indexOf(to.Package.PkgPath, context.objectPkgs) == -1 { //nolint:revive
+	if indexOf(to.Package.PkgPath, context.objectPkgs) == -1 {
 		suffix = context.definitionNameFor(toDocument, to)
 	}
 	return prefix + suffix

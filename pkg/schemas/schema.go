@@ -294,7 +294,7 @@ func mapToSchema(ctx *schemaContext, mapType *ast.MapType) *apiext.JSONSchemaPro
 	for keyInfo != nil {
 		switch typedKey := keyInfo.(type) {
 		case *types.Basic:
-			if typedKey.Info()&types.IsString == 0 { //nolint:revive
+			if typedKey.Info()&types.IsString == 0 {
 				ctx.pkg.AddError(loader.ErrFromNode(fmt.Errorf("map keys must be strings, not %s", keyInfo.String()), mapType.Key))
 				return &apiext.JSONSchemaProps{}
 			}
@@ -358,14 +358,14 @@ func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSON
 			continue
 		}
 		jsonOpts := strings.Split(jsonTag, ",")
-		if len(jsonOpts) == 1 && jsonOpts[0] == "-" { //nolint:revive
+		if len(jsonOpts) == 1 && jsonOpts[0] == "-" {
 			// skipped fields have the tag "-" (note that "-," means the field is named "-")
 			continue
 		}
 
 		inline := false
 		omitEmpty := false
-		for _, opt := range jsonOpts[1:] { //nolint:revive
+		for _, opt := range jsonOpts[1:] {
 			switch opt {
 			case "inline":
 				inline = true
@@ -373,7 +373,7 @@ func structToSchema(ctx *schemaContext, structType *ast.StructType) *apiext.JSON
 				omitEmpty = true
 			}
 		}
-		fieldName := jsonOpts[0]              //nolint:revive
+		fieldName := jsonOpts[0]
 		inline = inline || fieldName == Empty // anonymous fields are inline fields in YAML/JSON
 
 		// if no default required mode is set, default to required
@@ -428,13 +428,13 @@ func builtinToType(basic *types.Basic, allowDangerousTypes bool) (typ, format st
 	// non-string types.
 	basicInfo := basic.Info()
 	switch {
-	case basicInfo&types.IsBoolean != 0: //nolint:revive
+	case basicInfo&types.IsBoolean != 0:
 		typ = "boolean"
-	case basicInfo&types.IsString != 0: //nolint:revive
+	case basicInfo&types.IsString != 0:
 		typ = "string"
-	case basicInfo&types.IsInteger != 0: //nolint:revive
+	case basicInfo&types.IsInteger != 0:
 		typ = "integer"
-	case basicInfo&types.IsFloat != 0: //nolint:revive
+	case basicInfo&types.IsFloat != 0:
 		if allowDangerousTypes {
 			typ = "number"
 		} else {
