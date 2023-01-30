@@ -6,7 +6,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	k8s.io/apiextensions-apiserver v0.26.1
-	sigs.k8s.io/controller-tools v0.11.1
+	sigs.k8s.io/controller-tools v0.11.2
 )
 
 require (
